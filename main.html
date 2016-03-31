@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<!-- ************************************************ -->
+<!-- START: Necessary Meta - DO NOT EDIT THIS SECTION -->
+<!-- ************************************************ -->
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252" />
+<meta http-equiv="x-ua-compatible" content="ie=Edge">
+<META HTTP-EQUIV="CACHE-CONTROL" CONTENT="NO-CACHE">
+<META HTTP-EQUIV="Expires" CONTENT="100">
+<meta name="robots" content="noindex,nofollow,noarchive,noodp,noimageindex,nomediaindex" />
+<!-- ************************************************ -->
+<!--                 END: Necessary Meta              -->
+<!-- ************************************************ -->
+
+
+
+
+
+<!-- ************************************************ -->
+<!-- START: Common Scripts - DO NOT EDIT THIS SECTION -->
+<!-- ************************************************ -->
+<script type="text/javascript" src="../common/template/common-scripts.js"></script>
+<!-- ************************************************ -->
+<!--                END: Common Scripts               -->
+<!-- ************************************************ -->
+
+
+
+
+
+<!-- ************************************************ -->
+<!--             START: App Specific Files            -->
+<!--        Add Any of Your Custom Javascript,        --> 
+<!--   Custom CSS, and Other App Specific Files Here  -->
+<!-- ************************************************ -->  
+<link rel="stylesheet" type="text/css" media="all" href="app-style.css"/>  
+<script type="text/javascript" src="app-lib.js"></script>
+<!-- ************************************************ -->  
+<!--               END: App Script Files              -->
+<!-- ************************************************ -->
+
+
+
+
+
+<!-- ************************************************ -->
+<!--        START: App Title - DO NOT EDIT THIS SECTION      -->
+<!-- ************************************************ -->
+<script type="text/javascript">
+document.title = apptitle + " | SnapBack Apps";
+</script>
+<!-- ************************************************ -->
+<!--                  END: App Title                  -->
+<!-- ************************************************ -->
+
+
+
+
+
+<!-- ************************************************ -->
+<!--START: Required Scripts - DO NOT EDIT THIS SECTION-->
+<!-- ************************************************ -->
+<script type="text/javascript">
+	// Include package JS file after deployment
+	CreateAppJSFile();
+</script>
+<script type="text/javascript">
+	// Temporary Solution to Setting the Initial Permissions
+	var ManifestURL_Local = "%ALLUSERSPROFILE%\\cdp\\snapback\\apps\\menusapp\\menusapp.xml";
+	// Check to see if User is admin 
+	
+	// globals
+	var EnableButtonLMD=0;
+	var EnableButtonCurrent=0;
+    var curEnableButton=0;
+	var lastModDatebtn=0;
+    var defEnableBtn=0;
+	var AllowUserLMD=0;
+	var CurUserbtn="";
+	var CurrentUser=0;
+	var CautionLMD=0
+	var defcurCautionbtn=0;
+	var curCautionbtn=0;
+	var curCaution=0;
+	var defUserBtn="";
+	
+	// My Variables
+	var oTest = new ActiveXObject("wscript.shell");
+	DName = oTest.ExpandEnvironmentStrings("%COMPUTERNAME%") 
+	UName = oTest.ExpandEnvironmentStrings("%USERNAME%") 
+	var regBool=false;
+	var regNum=0;
+	var regString=null;
+	
+	// Initialize Global Permissions for Current User
+	InitializePermissions();    // needed because Install is not aware of all users and future users
+	var i=0;
+	    //Read App Registry Button Permissions 
+		curEnableButton="btn"+i+"_CurrentEnableButton"; // setup local variable name for button number	
+        var AppRoot = "HKEY_LOCAL_MACHINE\\SOFTWARE\\CDP\\SnapBack\\Apps\\";
+	    var RegPath = AppRoot + appname + "\\button" + i + "\\CurrentEnableButton";
+		//alert("for button: "+i+"   RegPath="+RegPath);
+		regBool = fnRegExists(RegPath);
+			if (regBool==false)
+			{
+				// runService to initialize registry for app 
+				// comment out for development and load your initial perms via a .reg file
+				// comment out if you have no buttons
+				runService(ManifestURL_Local,"","perms");
+			}
+			else
+			{
+				// read in data
+				//loop through number of buttons set by author
+	            for (i=0; i<btncount; i++)
+				{
+				try {
+					// this is to test to see if any enable button changes has been made 
+					EnableButtonLMD = GetButtonIniValue(appname, i, "EnableButtonLastModifiedDate");
+					lastModDatebtn="btn"+i+"_EnableButtonLastModified";
+					//setbtnValue(lastModDate,EnableButtonLMD);   // set local global value to registry entry
+					curEnableButton="btn"+i+"_CurrentEnableButton"; // setup local variable name for button number		
+					EnableButtonCurrent = GetButtonIniValue(appname,i,"CurrentEnableButton");  // Admin changed current value so get it
+					curEnableButton=eval(EnableButtonCurrent);  // set local global value to registry entry
+				} catch (e) {
+					// there is no enablebutton date so just get the value there
+					curEnableButton="btn"+i+"_CurrentEnableButton"; // setup local variable name for button number		
+					EnableButtonCurrent = GetButtonIniValue(appname,i,"CurrentEnableButton");  // Admin changed current value so get it
+					curEnableButton=eval(EnableButtonCurrent);  // set local global value to registry entry
+				}
+				try {
+					// see if admin change Normal User Flag
+					AllowUserLMD = GetButtonIniValue(appname,i,"AllowUserLastModifiedDate");
+					lastModDate="btn"+i+"_AllowUserLastModifiedDate";
+					//lastModDate,eval(AllowUserLMD);
+					currentUser= GetButtonIniValue(appname,i,"CurrentAllowUser");
+					curUserbtn="btn"+i+"_CurrentAllowUser";
+					CurUserbtn=eval(currentUser);
+				} catch (e) {
+				// Normal User has not been set by Admin  so just get allow user
+					currentUser= GetButtonIniValue(appname,i,"CurrentAllowUser");
+					curUserbtn="btn"+i+"_CurrentAllowUser";
+					CurUserbtn=eval(currentUser);
+				}
+				try {
+					// Check if admin modified caution flag for this button
+					CautionLMD = GetButtonIniValue(appname,i,"CautionLastModifiedDate");
+					lastModDate="btn"+i+"_CautionLastModifiedDate";
+					//setbtnValue(lastModDate,CautionLMD);
+					curCautionbtn="btn"+i+"_CurrentCaution";
+					curCaution= GetButtonIniValue(appname, i, "CurrentCaution"); 
+					//setbtnValue(curCautionbtn,curCaution);
+				}catch(e)
+				{
+	   				curCautionbtn="btn"+i+"_CurrentCaution";
+					curCaution= GetButtonIniValue(appname, i, "CurrentCaution"); 
+				} 
+	} // end loop through buttons
+			}
+	//DONT need to read in registry values as we get them when we need them
+</script>
+<script type="text/javascript" src="../common/scripts/onlinecheck.js"></script>
+<!-- ************************************************ -->
+<!--               END: Required Scripts              -->
+<!-- ************************************************ -->
+</head>
+<body>
+
+
+
+
+
+<!-- ************************************************ -->
+<!--  START: Left Sidebar - DO NOT EDIT THIS SECTION  -->
+<!-- ************************************************ -->
+
+<script type="text/javascript">CreateSidebar1();</script>
+
+	<script type="text/javascript">
+		var nodeURL = getRelativeURL();
+			loadTree('treemenu01', 'menu01', nodeURL, menu01);
+	</script>
+
+<script type="text/javascript">CreateSidebar2();</script>
+
+<!-- ************************************************ -->
+<!--                 END: Left Sidebar                -->
+<!-- ************************************************ -->
+
+
+
+
+
+<!-- ************************************************ -->
+<!-- START: Page Content 1 - DO NOT EDIT THIS SECTION -->
+<!-- ************************************************ -->
+<script type="text/javascript">CreatePageContent1();</script>
+<!-- ************************************************ -->
+<!--               END: Page Content 1                -->
+<!-- ************************************************ -->
+
+
+
+
+
+<!-- ************************************************ -->
+<!--     START: Page Tabs - Add More If Necessary     -->
+<!-- ************************************************ -->
+	<ul class="tabs">
+		<li><a href="#tab1" title="Run this App from Here">App Home</a></li>
+		<li><a href="#tab2" title="FAQs">Overview</a></li>
+		<li><a href="#tab3" title="The technical details of what this App does">How it Works</a></li>
+		<li><a href="#tab4" title="This App is free to Use">Pricing</a></li>
+		<li><a href="#tab5" title="Record of Each Committee's work and report to users">What's Certified</a></li>
+	</ul>
+<!-- ************************************************ -->
+<!--                 END: Page Tabs                   -->
+<!-- ************************************************ -->
+
+
+
+
+
+<!-- ************************************************ -->
+<!-- START: Page Content 2 - DO NOT EDIT THIS SECTION -->
+<!-- ************************************************ -->
+<script type="text/javascript">CreatePageContent2();</script>
+<!-- ************************************************ -->
+<!--               END: Page Content 2                -->
+<!-- ************************************************ -->
+
+
+
+
+
+<!-- ************************************************ -->
+<!--   START: Page Tab Content - Edit this Section    -->
+<!-- ************************************************ -->    				
+	<div id="tab1">
+
+		<h2>Easily Manage your Menus</h2>
+	
+		<p>The Menus App contains all the necessary information for you to effectively manage the menus included with the SnapBack Apps Platform.  Learn about how to create a menu that you and your users will utilize on a daily basis.  Run one of our custom scripts to create additional menus put together by the SnapBack Apps community.</p>
+		
+		<p>Menus in the SnapBack Apps Platform are visual lists of shortcuts so that you can easily run the programs, tools, and apps that you regularly use.  Some key instructions pertaining to the menus include:
+			<ul>  
+				<li>Any shortcut that you have that open applications files, folders, or webpage shortcuts can be added to and run from menus.</li>
+				<li>Any SnapBack App page may be started from any menu.  Simply click on the "Add a Shortcut of this App to your Menu" button next to that title of each app.</li>  
+				<li>For the current time, once your shortcut is in this "File Explorer folder" you will have to refresh the list of your new available shortcuts from this folder, from the active menu tab, before you can add them today. (NOTE: We will change this so that the menus will automatically add any new shortcuts to the list whenever you choose "ADD" in the menu.)</li>
+			</ul>
+		</p>
+		
+		<p>Click on the "Overview" tab above to read tips about your menus and gain a new appreciation for how these menus can work for you.</p>
+		
+		<p>Run any of the buttons below to create a custom menu, create a predeterminded menu, or reset everything to their defaults.  Do note, however, that this app is a work in progress.  Additional buttons will be added in the future and exisiting buttons will be made to work better for you.</p>
+		
+		<!-- ************************************************ -->
+		<!--  START: Button Table - DO NOT EDIT THIS SECTION  -->
+		<!-- ************************************************ -->	
+		<script type="text/javascript">CreateButtonRunTable();</script>
+		<!-- ************************************************ -->
+		<!--                 END: Button Table                -->
+		<!-- ************************************************ -->	
+			
+	</div><!--End Tab1-->
+	
+	<div id="tab2">
+		  
+		<h2>Overview - Menu Tips & Instructions</h2>
+		<p>Below are some tips, additional instructions, and miscellaneous notes regarding the menus in the SnapBack Apps Platform.</p>
+		
+		<h3>Tips</h3>
+		<p>Once your shortcut is in the menu's shortcut folder, you might want to rename it, change the icon, and test it to make sure that it works and opens the application properly.  Simply double-click the shortcut in File Explorer to test it.  If it works from File Explorer, it will work from the the menu.</p>
+
+		<p>If you'd like any shortcut to open running as an "admin" (assuming you are running as a member of the admin group), right click on the shortcut, click on "Advanced", and choose "Run as Administrator".  Before this shortcut will run from a menu, you should get a UAC prompt in both File Explorer and in one of the menu tabs.</p>
+		
+		<h3>Default Menus, their Folders, & their Purposes</h3>
+		<p>There are three menus that are installed and visible by default, each with their own purpose.  Each menu is permanently stored in its own folder set.  When you click on one of the menu tabs, then that menu is "mapped into" the active menu folder, which is located at "\AppData\CDP\OOM\" ("C:\Users\%CurrentUser%\AppData\Roaming\CDP\OOM\").  If you are modifying a menu, simply make sure that that menu tab is active, make your changes, and the changes will be kept in that active menu's permanent folder.</p>
+ 
+		<p>The MyMenu tab is designed to be for your own personal use and only for that logged in user.  While you might want to help the logged in user set this up initailly, you should allow each user to customize their own MyMenu.  The will likley need help your adding shortcuts to make them available to add to the menu, however.  This folder is permanently located at: "\AppData\CDP\MyMenu\" (Note: each logged in user has their own custom menu.)</p>
+
+		<p>Both the OurMenu and SharedMenu tabs are designed to be set up and shared between users.  OurMenu is designed for two or three users, and the "SharedMenu" is designed for sharing with a workgroup, or a whole company.</p>
+
+		<p>For example if you are primarily managing someone's PC, you can simply make any menu changes on your PC, and they will be reflected on the other user's PC as well.  Initially, the OurMenu folder is located at "C:\ProgramData\CDP\SnapBack\menus\ourmenu\".  To share this menu, you can simply change where this menu folder was, to a shared folder other users have access to.</p>
+		
+		<h3>Miscellaneous Notes</h3>
+		<p>If setting up a SharedMenu, we suggest that you share that folder with "read-only" rights, so every user you are sharing with doesn't modify your configuration.</p>
+
+		<p>Any menu tab folder can be saved, and then installed or made active on other PCs.  So you can create and use as many menus as you'd like.  You can also create more menu tabs, anytime you would like from this app.</p>
+
+		<p>If you create an extremely useful menu page, please share it with other users.  We will have different collections of menus, which you can map into any of your menu tabs when you need it.  For instance, Network Admins or PC admins might want custom tool menus, which can save time and frustration, rather than navigating by using Windows alone.</p> 
+		
+		<p>If you support a major application, consider creating a menu from a large set of useful functions specficically made for your application. Each button or function can be placed on a separate menu, and mapped in whenever that app is being used.  Each button can be as powerful as you'd like, which might include enabling a "normal, non-admin" user to run a function.  (These buttons must be certified and published by CDP to enable normal users to run as admin, with or without a UAC prompt.)</p>
+
+		<p>The Windows Key is not set to open SnapBack Apps or menus by default, but for most users, it is an extremely handy way to find and open all the apps regularly being used.  When on, the Windows Key will toggle between SnapBack and you last active Window.</p>
+		
+	</div><!--End Tab2-->
+	
+	<div id="tab3">
+	
+		<p></p>
+		
+		<!-- ************************************************************ -->
+		<!--  START: Button Permissions Table - DO NOT EDIT THIS SECTION  -->
+		<!-- ************************************************************ -->	
+		<div id="AdminPerms">
+			<script type="text/javascript">CreateButtonAdminTable();</script>
+		</div>
+		<!-- ************************************************************ -->
+		<!--                 END: Button Permissions Table                -->
+		<!-- ************************************************************ -->
+
+		
+		
+		<p>The Menus are simply a collection of shortcuts which are mapped into an active tab at the time of its use.</p>
+		
+		
+		
+		<!-- ******************************************************* -->
+		<!--  START: Source Code Display - DO NOT EDIT THIS SECTION  -->
+		<!-- ******************************************************* -->	
+		<script type="text/javascript">CreateSrcCodeIframes();</script>
+		<!-- ******************************************************* -->
+		<!--                END: Source Code Display                 -->
+		<!-- ******************************************************* -->
+	
+	</div><!--End Tab3-->
+	
+	<div id="tab4">
+		  
+		<!-- ********************************************************************************* -->
+		<!--                    Below is the standard app pricing information                  -->
+		<!-- Remove and include your app's individual pricing details in platin HTML if needed -->
+		<!-- ********************************************************************************* -->
+		<script type="text/javascript">CreateStandardPricing();</script>
+		
+		
+		
+	</div><!--End Tab4-->
+						
+	<div id="tab5">
+			
+		<!-- ******************************************************************** -->
+		<!--            Below is the standard certification information           -->
+		<!--            Do not remove or otherwise modify this section            -->
+		<!-- ******************************************************************** -->
+		<script type="text/javascript">CreateStandardCertification();</script>
+		
+		
+		
+	</div><!--End Tab5-->
+<!-- ************************************************ -->
+<!--              End: Page Tab Content               -->
+<!-- ************************************************ -->   	
+
+
+
+
+
+
+
+<!-- ************************************************ -->
+<!--      START: Footer - DO NOT EDIT THIS SECTION    -->
+<!-- ************************************************ -->
+<script type="text/javascript">CreateFooter();</script>
+<!-- ************************************************ -->
+<!--                    END: Footer                   -->
+<!-- ************************************************ -->
+
+
+
+
+
+<!-- ************************************************ -->
+<!-- START: Required Web Page Logic close of body tag -->
+<!--             DO NOT EDIT THIS SECTION             -->
+<!-- ************************************************ -->
+<script type="text/javascript">
+   var nCDPButtons = btncount;  // Number of buttons for page set by applib.js.
+   // Global array of button objects inheriting from CDPButton class
+   var oButtonsArray = [];
+   oButtonsArray.length = nCDPButtons;  //Number of buttons for page. Array elements start with zero, so 3 buttons have elements 0 - 2.
+</script>
+<script type="text/javascript" src="../common/scripts/cdp-uri.js"></script>
+<script type="text/javascript">
+   <!--
+   // Globals used by ../common/webpagelogic.js
+   var PackageName = appname;  // Package name set by applib.js
+
+	// DEVELOPER NOTE: Next value can be set, but is optional
+   var DemoPageName = "";	// Leave this blank or use an independent html file.
+   
+   var LivePageName = "main.html";
+   
+   var ButtonCount = oButtonsArray.length;
+   var oWPLogic;
+   /* Next initialization is the function name in [packagename]lib.js that runs when the "?run=1" parameter is included in the url */
+   var RunableFunction = "runapp()";
+   loadScript("../common/scripts/webpagelogic.js", function()
+   {
+      // Initialization code for instantiation of web page object
+      oWPLogic = new Webpage(PackageName, DemoPageName, LivePageName, ButtonCount);    //Function in ../common/webpagelogic.js
+      
+      snAppPage(oWPLogic);
+//      oWPLogic.isLocal = false;   //Uncomment this line to force online behavior
+
+      if (oWPLogic.isLocal)
+      {
+         /* No code here right now. */
+      }
+      else
+      {
+         /* Set oWPLogic properties from cdpbutton# divs */
+         fnGetAttributes(oWPLogic);
+         fnMakeCdpButtons(oWPLogic);
+      }
+   });
+   // -->
+</script>
+<!-- ********************************************** -->
+<!-- END: Required Web Page Logic close of body tag -->
+<!-- ********************************************** -->
+
+
+
+
+
+</body>
+</html> 
+
