@@ -17,4 +17,6 @@ Add any notes you may find pertinent
 Changelog
 
 ----
+04/18/2016, smadara, Added custom run function to buttons
+
 03/31/2016, smadara, Initial Commit
